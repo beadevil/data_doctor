@@ -93,7 +93,7 @@ if csv_file is not None:
     st.write("#### DATA Cleaning :")
     st.write("")
     dt_c=st.selectbox("Select cleaning process :",("None","Drop null value","Delete Row / Column"))
-    st.write("### PLEASE SELECT NONE TO RESET DATA")
+    st.write("##### PLEASE SELECT NONE TO RESET DATA")
     if dt_c=="None":
         df.to_csv('original.csv', index=False)
     if dt_c==("Drop null value"):
