@@ -14,7 +14,7 @@ from statsmodels.formula.api import ols
 from bioinfokit.analys import stat
 
 st.title("DATA DOCTOR")
-
+st.write("#### CREATED BY Be a DEVIL")
 st.write("### ( INFORMATION | PLOTING | ANOVA | REGRESSION )")
 st.write("")
 st.write("")
