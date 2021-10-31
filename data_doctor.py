@@ -13,8 +13,10 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from bioinfokit.analys import stat
 
+st.set_option('deprecation.showPyplotGlobalUse', False)
+
 st.title("DATA DOCTOR")
-st.write("#### CREATED BY Be a DEVIL")
+
 st.write("### ( INFORMATION | PLOTING | ANOVA | REGRESSION )")
 st.write("")
 st.write("")
@@ -92,18 +94,18 @@ if csv_file is not None:
         aaa=1
     st.write("#### DATA Cleaning :")
     st.write("")
-    dt_c=st.selectbox("Select cleaning process :",("None","Drop null value","Delete Row / Column"))
-    st.write("##### PLEASE SELECT NONE TO RESET DATA")
+    dt_c=st.selectbox("Select cleaning process :",("None","Drop null value","Delete Row / Column","Replace NULL Value"))
     if dt_c=="None":
         df.to_csv('original.csv', index=False)
     if dt_c==("Drop null value"):
-        if sum(df.isnull().sum())>0:
-            df=pd.read_csv("original.csv")
-            df=df.dropna()
-            df.to_csv('original.csv', index=False)
-            st.write("Null value droped.")
-        else:
-            st.write("There is no null value.")
+        if st.button("Clean"):
+            if sum(df.isnull().sum())>0:
+                df=pd.read_csv("original.csv")
+                df=df.dropna()
+                df.to_csv('original.csv', index=False)
+                st.write("Null value droped.")
+            else:
+                st.write("There is no null value.")
     if dt_c==("Delete Row / Column"):
         df=pd.read_csv("original.csv")
         del_row=st.selectbox("Select Row :",(df.index))
@@ -114,6 +116,21 @@ if csv_file is not None:
         if st.button("Delete Column"):
             df.drop(del_col,inplace = True,axis=1)
             df.to_csv('original.csv', index=False)
+    if dt_c==("Replace NULL Value"):
+        df=pd.read_csv("original.csv")
+        col_name=st.selectbox("Select Column :",(df.columns))
+        if col_name in df.select_dtypes(include=['object']).columns:
+            r_v=st.text_input('Input object data:')
+        if col_name in df.select_dtypes(include=['int64','float64']).columns:
+            r_v=st.text_input('Input numeric data:')
+            if r_v.isnumeric():
+                r_v=float(r_v)
+            else:
+                st.write("Please enter a valid number .")
+        if st.button("Replace"):
+            df[col_name].fillna(r_v, inplace = True)
+            df.to_csv('original.csv', index=False)
+            st.write("DONE")
 
     cl_data(df)
     st.write("")
@@ -124,43 +141,46 @@ if csv_file is not None:
     if dt_p=="BOX PLOT":
         box_x=st.selectbox("Select X axis (Column name) :",df.columns)
         box_y=st.selectbox("Select Y axis (Column name) :",df.drop(box_x,axis=1).columns)
-        bp =sns.boxplot(x=box_x, y=box_y, data=df, color='#99c2a2')
-        bp =sns.swarmplot(x=box_x, y=box_y, data=df, color='#7d0013')
-        st.set_option('deprecation.showPyplotGlobalUse', False)
-        plt.show()
-        st.pyplot()
+        if st.button("plot"):
+            bp =sns.boxplot(x=box_x, y=box_y, data=df, color='#99c2a2')
+            bp =sns.swarmplot(x=box_x, y=box_y, data=df, color='#7d0013')
+            st.set_option('deprecation.showPyplotGlobalUse', False)
+            plt.show()
+            st.pyplot()
     if dt_p=="BAR PLOT":
         bar_x=st.selectbox("Select X axis (Column name) :",df.columns)
         bar_y=st.selectbox("Select Y axis (Column name) :",df.drop(bar_x,axis=1).columns)
-        if bar_x and bar_y in df.columns:
-            plt.bar(df[bar_x],df[bar_y],color="r", width = 0.1)
-            plt.xlabel(bar_x)
-            plt.ylabel(bar_y)
-            plt.show()
-            st.pyplot()
-        else:
-            st.write("This Column is not avalable.")
+        if st.button("plot"):
+            if bar_x and bar_y in df.columns:
+                plt.bar(df[bar_x],df[bar_y],color="r", width = 0.1)
+                plt.xlabel(bar_x)
+                plt.ylabel(bar_y)
+                plt.show()
+                st.pyplot()
+            else:
+                st.write("This Column is not avalable.")
     if dt_p=="PIE PLOT":
         pie_c=st.selectbox("Select Column name :",df.columns)
-        if pie_c in df.columns:
-            if sum(df.isnull().sum())==0:
-                if pie_c in df.select_dtypes(include=['int64','float64']).columns:
-                    count = 0
-                    for number in df[pie_c]:
-                        if number < 0:
-                            count += 1
-                        if count==0:
-                            bp =plt.pie(df[pie_c],labels =df[pie_c])
-                            plt.show()
-                            st.pyplot()
-                        else:
-                            st.write("This Column have -ve data.")
+        if st.button("plot"):
+            if pie_c in df.columns:
+                if sum(df.isnull().sum())==0:
+                    if pie_c in df.select_dtypes(include=['int64','float64']).columns:
+                        count = 0
+                        for number in df[pie_c]:
+                            if number < 0:
+                                count += 1
+                            if count==0:
+                                bp =plt.pie(df[pie_c],labels =df[pie_c])
+                                plt.show()
+                                st.pyplot()
+                            else:
+                                st.write("This Column have -ve data.")
+                    else:
+                        st.write("This Column have object type data.")
                 else:
-                    st.write("This Column have object type data.")
+                    st.write("Please clean your data.")
             else:
-                st.write("Please clean your data.")
-        else:
-            st.write("This Column is not avalable.")
+                st.write("This Column is not avalable.")
     if sum(df.isnull().sum())==0:
         df_c_o=df.select_dtypes(include=['object']).columns
         for i in df_c_o:
